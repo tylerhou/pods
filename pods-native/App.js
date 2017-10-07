@@ -41,8 +41,20 @@ class PodListScreen extends React.Component {
       console.log('on end');
     });
 
+    return (
+      <View style={{ display: 'flex', flexDirection: 'column' }}>
+        <PodList pods={data.pods} onPress={(id) => navigation.navigate('Pod', { id })} />
+        <AddPod />
+      </View>
+    )
+  }
+}
 
-    {while(data.pods.length>=0){
+class PodScreen extends React.Component {
+
+  render() {
+    let jsCode =`
+    while(data.pods.length>=0){
       const url =data.pods.songs[data.pods.length].track_url;
       data.pods.songs[data.pods.length].pop();
       AudioPlayer.prepare(url, () => {
@@ -57,21 +69,19 @@ class PodListScreen extends React.Component {
       }, currentTime+duration);
       AudioPlayer.stop();
       AudioPlayer.pause();
-      AudioPlayer.setCurrentTime(50.5);})}}
+      AudioPlayer.setCurrentTime(50.5);}
 
-    return (
-      <View style={{ display: 'flex', flexDirection: 'column' }}>
-        <PodList pods={data.pods} onPress={(id) => navigation.navigate('Pod', { id })} />
-        <AddPod />
-      </View>
-    )
-  }
-}
 
-class PodScreen extends React.Component {
-  render() {
+    `
     return (
-      <Pod id={this.props.navigation.state.params.id} />
+      <View>
+        <Pod id={this.props.navigation.state.params.id} />
+          <WebView
+            injectedJavaScript = {jsCode}
+            javaScriptEnabledAndroid={true}
+            >
+            </WebView>
+        </View>
     );
   }
 }
