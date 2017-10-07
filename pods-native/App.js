@@ -17,7 +17,7 @@ import AudioPlayer from 'react-native-play-audio';
 class App extends React.Component {
   render() {
     const networkInterface = createNetworkInterface({
-      uri: 'http:localhost/graphql',
+      uri: 'http:localhost/graphql'
     });
     const client = new ApolloClient({ networkInterface });
 
@@ -37,9 +37,7 @@ class PodListScreen extends React.Component {
     if (data.loading) return <Text>Loading</Text>
     if (data.error) return <Text>{data.error.message}</Text>
 
-    AudioPlayer.onEnd(() => {
-      console.log('on end');
-    });
+
 
     return (
       <View style={{ display: 'flex', flexDirection: 'column' }}>
@@ -53,7 +51,7 @@ class PodListScreen extends React.Component {
 class PodScreen extends React.Component {
 
   render() {
-    let jsCode =`
+    /*<--let jsCode =`
     for (int i, data.pods.songs.length>=1, i++){
       const url ='http:data.pods.songsdata.pods.length.track_url';
       data.pods[i].songs.pop();
@@ -67,22 +65,26 @@ class PodScreen extends React.Component {
           console.log(currentTime);
         });
       }, 1000);
+      AudioPlayer.onEnd(() => {
+        console.log('on end');
+      });
       AudioPlayer.stop();
       AudioPlayer.pause();
       AudioPlayer.setCurrentTime(50.5);}
     document.write('aayyyyeee');
 
 
-    `
+    `-->*/
     return (
-      <View>
+      /*<--<View>-->*/
         <Pod id={this.props.navigation.state.params.id} />
-          injectedJavaScript = {jsCode}
-          javaScriptEnabledAndroid={true}
-      </View>
-    );
+          /*<--injectedJavaScript = {jsCode}
+          javaScriptEnabledAndroid={true}-->*/
+      /*<--</View>-->*/
+      );
+    }
   }
-}
+
 
 const Routes = StackNavigator({
   PodList: {
@@ -92,7 +94,7 @@ const Routes = StackNavigator({
     path: 'pods/:id',
     screen: PodScreen
   }
-})
+});
 
 class Home extends React.Component {
   render() {
