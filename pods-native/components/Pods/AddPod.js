@@ -8,23 +8,27 @@ import { ADD_POD, GET_PODS } from '../../queries';
 class AddPod extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { };
   }
   
   render() {
     return (
-      <View style={styles.container}>
+      <View style={{ display: 'flex', marginTop: 10, flex: 1, paddingLeft: 10, paddingRight: 10 }}>
         <TextInput
           style={styles.input}
           value={this.state.text}
           onChangeText={(text) => this.setState({ text })}
+          placeholder='New pod name'
         />
         <Button
-          title="Add new channel"
-          onPress={() => this.props.mutate({
-            variables: { name: this.state.text },
-            refetchQueries: [ { query: GET_PODS } ],
-          })}
+          title="Add new pod"
+          onPress={() => {
+            this.props.mutate({
+              variables: { name: this.state.text },
+              refetchQueries: [ { query: GET_PODS } ],
+            });
+            this.setState({ text: '' });
+          }}
         />
       </View>
     );
@@ -32,13 +36,9 @@ class AddPod extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   input: {
-    width: 100,
+    width: '100%',
+    height: 24,
   }
 });
 
