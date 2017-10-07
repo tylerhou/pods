@@ -26,6 +26,10 @@
     "graphql-tools": "^2.2.1",
     "react": "16.0.0-alpha.12",
     "react-apollo": "^1.4.16",
-    "react-native": "^0.48.4"
-  }
+    "react-native": "^0.48.4",
+    "react-native-video": "^2.0.0"
+  },
+  "description": "This project was bootstrapped with [Create React Native App](https://github.com/react-community/create-react-native-app).",
+  "author": "",
+  "license": "ISC"
 }
