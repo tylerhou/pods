@@ -18,6 +18,7 @@ const typeDefs = `
 
   type Query {
     pods: [Pod]
+    pod(id: ID!): Pod
   }
 
   type Mutation {
