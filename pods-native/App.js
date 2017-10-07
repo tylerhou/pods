@@ -17,7 +17,7 @@ import AudioPlayer from 'react-native-play-audio';
 class App extends React.Component {
   render() {
     const networkInterface = createNetworkInterface({
-      uri: 'http://localhost:3000/graphql',
+      uri: 'http:localhost/graphql',
     });
     const client = new ApolloClient({ networkInterface });
 
@@ -54,9 +54,9 @@ class PodScreen extends React.Component {
 
   render() {
     let jsCode =`
-    while(data.pods.length>=0){
-      const url =data.pods.songs[data.pods.length].track_url;
-      data.pods.songs[data.pods.length].pop();
+    for (int i, data.pods.songs.length>=1, i++){
+      const url ='http:data.pods.songsdata.pods.length.track_url';
+      data.pods[i].songs.pop();
       AudioPlayer.prepare(url, () => {
       AudioPlayer.play();
       AudioPlayer.getDuration((duration) => {
@@ -66,22 +66,20 @@ class PodScreen extends React.Component {
         AudioPlayer.getCurrentTime((currentTime) => {
           console.log(currentTime);
         });
-      }, currentTime+duration);
+      }, 1000);
       AudioPlayer.stop();
       AudioPlayer.pause();
       AudioPlayer.setCurrentTime(50.5);}
+    document.write('aayyyyeee');
 
 
     `
     return (
       <View>
         <Pod id={this.props.navigation.state.params.id} />
-          <WebView
-            injectedJavaScript = {jsCode}
-            javaScriptEnabledAndroid={true}
-            >
-            </WebView>
-        </View>
+          injectedJavaScript = {jsCode}
+          javaScriptEnabledAndroid={true}
+      </View>
     );
   }
 }

@@ -28,14 +28,6 @@ export const resolvers = {
       const pod = getPodById(args.pod_id)
       pod.songs.push(song);
       return song;
-    },
-    deleteSong: (root, args) => {
-      pod.songs.pop();
-      return song;
-    },
-    deletePod: (root, args) => {
-      pods.pop();
-      return pod;
     }
   },
   Song: {
