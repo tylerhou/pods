@@ -6,6 +6,7 @@ const typeDefs = `
   type SoundCloudSong {
     id: ID!
     track_url: String!
+
   }
 
   union Song = SoundCloudSong

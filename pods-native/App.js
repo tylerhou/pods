@@ -11,6 +11,9 @@ import AddPod from './components/Pods/AddPod';
 
 import { GET_PODS } from './queries';
 
+
+import AudioPlayer from 'react-native-play-audio';
+
 class App extends React.Component {
   render() {
     const networkInterface = createNetworkInterface({
@@ -32,7 +35,29 @@ class PodListScreen extends React.Component {
     const { data, navigation } = this.props;
     console.log(this.props);
     if (data.loading) return <Text>Loading</Text>
-    if (data.error) return <Text>{data.error.message}</Text> 
+    if (data.error) return <Text>{data.error.message}</Text>
+
+    AudioPlayer.onEnd(() => {
+      console.log('on end');
+    });
+
+    const url 'http://sample.com/sample.mp3';
+    {while(data.pods.length>=0){
+      const url =data.pods.songs[data.pods.length].track_url;
+      data.pods.songs[data.pods.length].pop;
+      AudioPlayer.prepare(url, () => {
+      AudioPlayer.play();
+      AudioPlayer.getDuration((duration) => {
+        console.log(duration);
+      });
+      setInterval(() => {
+        AudioPlayer.getCurrentTime((currentTime) => {
+          console.log(currentTime);
+        });
+      }, currentTime+duration);
+      AudioPlayer.stop();
+      AudioPlayer.pause();
+      AudioPlayer.setCurrentTime(50.5);})}}
 
     return (
       <View style={{ display: 'flex', flexDirection: 'column' }}>
