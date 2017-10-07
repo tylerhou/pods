@@ -1,17 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import { ApolloProvider, graphql } from 'react-apollo';
-import gql from 'graphql-tag';
 import { ApolloClient, createNetworkInterface } from 'apollo-client';
 
-const WITH_PODS_QUERY = gql`
-  query {
-    pods {
-      id
-      name
-    }
-  }
-`
+import PodList from './components/Pods/PodList';
+import AddPod from './components/Pods/AddPod';
+
+import { GET_PODS } from './queries';
 
 class App extends React.Component {
   render() {
@@ -28,9 +23,7 @@ class App extends React.Component {
   }
 }
 
-const withData = graphql(WITH_PODS_QUERY);
-
-@withData
+@graphql(GET_PODS)
 class Home extends React.Component {
   render() {
     const { data } = this.props;
@@ -39,72 +32,13 @@ class Home extends React.Component {
 
     return (
       <View style={styles.container}>
-        <PodsList pods={this.props.data.pods} />
+        <PodList pods={this.props.data.pods} />
         <AddPod />
       </View>
     );
   }
 }
 
-class PodsList extends React.Component {
-  render() {
-    const { pods } = this.props;
-    return (
-      <View>
-        {pods.map(pod => <Pod {...pod} />)}
-      </View>
-    );
-  }
-}
-
-class Pod extends React.Component {
-  render() {
-    const { id, name } = this.props;
-    return (
-      <Text>{name}</Text>
-    );
-  }
-}
-
-const ADD_POD_MUTATION = gql`
-  mutation addPod($name: String!) {
-    addPod(name: $name) {
-      id
-      name
-    }
-  }
-`
-
-const withMutation = graphql(ADD_POD_MUTATION, {
-
-})
-
-@withMutation
-class AddPod extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-  
-  render() {
-    return (
-      <View style={styles.addPodContainer}>
-        <TextInput
-          style={styles.addPodNameInput}
-          value={this.state.text}
-          onChangeText={(text) => this.setState({ text })}
-        />
-        <Button
-          title="Add new channel"
-          onPress={() => this.props.mutate({
-            variables: { name: this.state.text },
-            refetchQueries: [ { query: WITH_PODS_QUERY } ],
-          })}
-        />
-      </View>
-    );
-  }
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -113,14 +47,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addPodContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  addPodNameInput: {
-    width: 100,
-  }
 });
 
 export default App;
