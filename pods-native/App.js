@@ -41,10 +41,10 @@ class PodListScreen extends React.Component {
       console.log('on end');
     });
 
-    
+
     {while(data.pods.length>=0){
       const url =data.pods.songs[data.pods.length].track_url;
-      data.pods.songs[data.pods.length].pop;
+      data.pods.songs[data.pods.length].pop();
       AudioPlayer.prepare(url, () => {
       AudioPlayer.play();
       AudioPlayer.getDuration((duration) => {
