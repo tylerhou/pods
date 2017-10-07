@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, TextInput, Button, StyleSheet, print } from 'react-native';
 import { graphql } from 'react-apollo';
 
 import { ADD_POD, GET_PODS } from '../../queries';
@@ -10,7 +10,7 @@ class AddPod extends React.Component {
     super(props);
     this.state = { };
   }
-  
+
   render() {
     return (
       <View style={{ display: 'flex', marginTop: 10, flex: 1, paddingLeft: 10, paddingRight: 10 }}>
@@ -18,16 +18,26 @@ class AddPod extends React.Component {
           style={styles.input}
           value={this.state.text}
           onChangeText={(text) => this.setState({ text })}
-          placeholder='New pod name'
+          placeholder='New Playlist Name' //
         />
         <Button
-          title="Add new pod"
+          title="Add New Playlist" //
           onPress={() => {
-            this.props.mutate({
-              variables: { name: this.state.text },
-              refetchQueries: [ { query: GET_PODS } ],
-            });
-            this.setState({ text: '' });
+
+            ////////
+
+            if (this.state.text == null) {
+              alert("IBM Error! \n Playlist name needed")
+            } else {
+              this.props.mutate({
+                variables: { name: this.state.text },
+                refetchQueries: [ { query: GET_PODS } ],
+              });
+              this.setState({ text: '' });
+            };
+
+            /////////
+
           }}
         />
       </View>

@@ -14,11 +14,13 @@ class Pod extends React.Component {
 
     return (
       <View>
-        <Text>Pod name: {pod.name}</Text>
+        <Text>Playlist name: {pod.name.charAt(0).toUpperCase() + pod.name.slice(1)}</Text>
+        <Text> </Text>
         <Text>Songs</Text>
+        <Text>---------</Text>
         <SongList songs={pod.songs} />
-        <AddSong pod_id={pod.id}/>    
-      </View>      
+        <AddSong pod_id={pod.id}/>
+      </View>
     );
   }
 }
@@ -51,7 +53,7 @@ class AddSong extends React.Component {
     super(props);
     this.state = {};
   }
-  
+
   render() {
     return (
       <View style={{ display: 'flex', marginTop: 10, flex: 1, paddingLeft: 10, paddingRight: 10 }}>
