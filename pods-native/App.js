@@ -41,7 +41,7 @@ class PodListScreen extends React.Component {
       console.log('on end');
     });
 
-    const url 'http://sample.com/sample.mp3';
+    
     {while(data.pods.length>=0){
       const url =data.pods.songs[data.pods.length].track_url;
       data.pods.songs[data.pods.length].pop;
