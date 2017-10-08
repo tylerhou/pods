@@ -4,10 +4,20 @@ import { graphql } from 'react-apollo';
 
 import Video from 'react-native-video';
 
-import { GET_POD, ADD_SONG, POP_SONG } from '../../queries';
+import { GET_POD, ADD_SONG, POP_SONG, POD_SUBSCRIPTION, SET_TIME_OFFSET, CHANGE_PLAYING } from '../../queries';
 
 @graphql(GET_POD)
 class Pod extends React.Component {
+  componentWillMount() {
+    this.props.data.subscribeToMore({
+      document: POD_SUBSCRIPTION,
+      variables: {
+        pod_id: this.props.id,
+      }, 
+      updateQuery: (prev, { subscriptionData }) => ({ ...prev, pod: subscriptionData.data.podChanged })
+    });
+  }
+
   render() {
     const { data } = this.props;
     if (data.loading) return <Text>Loading</Text>
@@ -23,7 +33,11 @@ class Pod extends React.Component {
         {
           pod.songs.length === 0 ?
           <Text>Add a song!</Text>
-          : <SongPlayer song={pod.songs[0]} pod_id={pod.id} />  
+          : <SongPlayer
+              time_offset={pod.time_offset}
+              playing={pod.playing}
+              song={pod.songs[0]} pod_id={pod.id}
+            />  
         }
       </View>      
     );
@@ -46,7 +60,9 @@ class SongListItem extends React.Component {
   render() {
     const { song } = this.props;
     return (
-      <Text>{song.title}</Text>
+      <View>
+        <Text>{song.title}</Text>
+      </View>
     );
   }
 }
@@ -140,7 +156,9 @@ class AddSong extends React.Component {
 }
 
 
-@graphql(POP_SONG)
+@graphql(POP_SONG, { name: 'popSong' })
+@graphql(SET_TIME_OFFSET, { name: 'setTimeOffset' })
+@graphql(CHANGE_PLAYING, { name: 'changePlaying' })
 class SongPlayer extends React.Component {
   constructor(props) {
     super(props);
@@ -148,7 +166,7 @@ class SongPlayer extends React.Component {
   }
 
   skip = (song_id, pod_id) => {
-    this.props.mutate({
+    this.props.popSong({
       variables: { pod_id: pod_id, song_id: song_id },
       refetchQueries: [ { query: GET_POD, variables: { id: pod_id } } ],
     });
@@ -156,15 +174,20 @@ class SongPlayer extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.song.id !== this.props.song.id) this.player.seek(0);
+    if (Math.abs(this.props.time_offset - this.state.time) > 10)
+      this.setState({ time: this.props.time_offset }, () => this.player.seek(this.props.time_offset));
+    if (prevProps.playing !== this.props.playing) this.setState({ playing: this.props.playing });
+  }
+
+  componentDidMount() {
+    this.player.seek(this.props.time_offset);
+    this.setState({ playing: this.props.playing });
   }
 
   render() {
     const { song, pod_id } = this.props;
-    const { paused, time={}, status } = this.state;
+    const { playing=true, time=0, status, songLength=0 } = this.state;
     if (!song) return <Text>No internet connection</Text>;
-    const songLength = time.seekableDuration || 1; 
-    const currentTime = time.atValue / time.atTimescale || 0;
-
     const displaySeconds = (_seconds) => {
       const minutes = Math.floor(_seconds/60);
       const seconds = Math.floor(_seconds%60);
@@ -180,11 +203,19 @@ class SongPlayer extends React.Component {
             source={{ uri: song.stream_url }}
             ref={(ref) => this.player = ref}
             volume={1.0}
-            paused={paused}
+            paused={!playing}
             playInBackground={true}
             playWhenInactive={true}
             ignoreSilentSwitch={"ignore"}
-            onProgress={time => this.setState({ time, status: 'Playing.' })}
+            onProgress={_time => {
+              const time = Math.floor(_time.atValue / _time.atTimescale)
+              this.setState({  time, songLength: _time.seekableDuration, status: 'Playing.' })
+              if (Math.abs(this.props.time_offset - time) <= 3) {
+                this.props.setTimeOffset({
+                  variables: { pod_id, time }
+                })
+              }
+            }}
             onLoadStart={() => this.setState({ status: 'Loading...' })}
             onLoad={() => this.setState({ status: 'Loaded! About to play.' })}
             onError={() => this.setState({ status: 'Song error.' })}
@@ -192,14 +223,24 @@ class SongPlayer extends React.Component {
             onEnd={() => this.skip(song.id, pod_id)}
           />
         }
-        <Text>{status === 'Playing.' && paused ? 'Paused' : status}</Text>
+        <Text>{status === 'Playing.' && !playing ? 'Paused' : status}</Text>
         <Text numberOfLines={1} style={{ fontWeight: 'bold' }}>Now playing: {song.title}</Text>
         <Text numberOfLines={1}>Artist: {song.artist}</Text>
-        <Slider maximumValue={songLength} value={currentTime} onSlidingComplete={(time) => this.player.seek(time)} style={{ width: '90%' }}/>
+        <Slider maximumValue={songLength} value={time} onSlidingComplete={(time) => {
+          this.player.seek(time)
+          this.props.setTimeOffset({
+            variables: { pod_id, time: Math.floor(time) }
+          })
+        }} style={{ width: '90%' }}/>
         <View style={{ display: 'flex', flexDirection: 'row' }}>
-          <Button onPress={() => this.setState({ paused: !paused })} title={ paused ? "Play" : "Pause" } />
+          <Button onPress={() => {
+            this.props.changePlaying({
+              variables: { pod_id: pod_id, playing: !playing }
+            })
+            this.setState({ playing: !playing })
+          }} title={ !playing ? "Play" : "Pause" } />
           <Button onPress={() => this.skip(song.id, pod_id)} title="skip" />
-          <Text>{`${displaySeconds(currentTime)}/${displaySeconds(songLength)}`}</Text>
+          <Text>{`${displaySeconds(time)}/${displaySeconds(songLength)}`}</Text>
         </View>
       </View>
     );

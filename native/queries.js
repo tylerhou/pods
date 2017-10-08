@@ -19,8 +19,10 @@ export const GET_PODS = gql`
         id
         artist
         title
-        stream_url 
+        stream_url
       }
+      playing
+      time_offset
     }
   }
 `
@@ -36,6 +38,8 @@ export const GET_POD = gql`
         title
         stream_url 
       }
+      playing
+      time_offset
     }
   }
 `
@@ -56,5 +60,52 @@ export const POP_SONG = gql`
     popSong(pod_id: $pod_id, song_id: $song_id) {
       id
     }
+  }
+`
+
+export const POD_SUBSCRIPTION = gql`
+  subscription podChanged($pod_id: ID!) {
+    podChanged(pod_id: $pod_id) {
+      id
+      name
+      songs {
+        id
+        title
+        artist
+        stream_url
+      }
+      playing
+      time_offset
+    }
+  } 
+`
+
+export const POD_LIST_SUBSCRIPTION = gql`
+  subscription podListChanged {
+    podListChanged {
+      id
+      name 
+      songs {
+        id
+        artist
+        title
+        stream_url
+      }
+      playing
+      time_offset
+    }
+  }
+`
+
+export const SET_TIME_OFFSET = gql`
+  mutation seekPod($pod_id: ID!, $time: Int!) {
+    seekPod(pod_id:$pod_id, time: $time)
+  }
+`
+
+
+export const CHANGE_PLAYING = gql`
+  mutation changePlaying($pod_id: ID!, $playing: Boolean!) {
+    changePlaying(pod_id: $pod_id, playing: $playing)
   }
 `

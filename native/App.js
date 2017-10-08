@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import { ApolloProvider, graphql } from 'react-apollo';
 import { ApolloClient, createNetworkInterface, toIdValue } from 'apollo-client';
+import { SubscriptionClient, addGraphQLSubscriptions } from 'subscriptions-transport-ws';
 
 import { StackNavigator } from 'react-navigation';
 import Video from 'react-native-video';
@@ -10,25 +11,24 @@ import PodList from './components/Pods/PodList';
 import Pod from './components/Pods/Pod';
 import AddPod from './components/Pods/AddPod';
 
-import { GET_PODS } from './queries';
+import { GET_PODS, POD_LIST_SUBSCRIPTION } from './queries';
 
 class App extends React.Component {
   render() {
+    const DOMAIN = 'www.calhacks-pods.com';
     const networkInterface = createNetworkInterface({
-      uri: 'https://calhacks-pods.azurewebsites.net/graphql',
+      uri: `https://${DOMAIN}/graphql`,
     });
+    
+    const wsClient = new SubscriptionClient(`wss://${DOMAIN}/subscriptions`, {
+      reconnect: true,
+    })
 
-    const dataIdFromObject = (result) => {
-      if (result.__typename) {
-        if (result.id !== undefined) {
-          return `${result.__typename}:${result.id}`;
-        }
-      }
-      return null;
-    }
+    const networkInterfaceWithSubscriptions
+      = addGraphQLSubscriptions(networkInterface, wsClient)
 
     const client = new ApolloClient({
-      networkInterface,
+      networkInterface: networkInterfaceWithSubscriptions
     });
 
     return (
@@ -41,6 +41,16 @@ class App extends React.Component {
 
 @graphql(GET_PODS)
 class PodListScreen extends React.Component {
+  componentWillMount() {
+    this.props.data.subscribeToMore({
+      document: POD_LIST_SUBSCRIPTION,
+      variables: {
+        pod_id: this.props.id,
+      }, 
+      updateQuery: (prev, { subscriptionData }) => ({ ...prev, pods: subscriptionData.data.podListChanged })
+    });
+  }
+
   render() {
     const { data, navigation } = this.props;
     if (data.loading) return <Text>Loading</Text>
