@@ -24,6 +24,7 @@ const typeDefs = `
   type Mutation {
     addPod(name: String!): Pod
     addSong(pod_id: ID!, track_url: String!): Song
+    popSong(song_id: ID!, pod_id: ID!): Song
   }
 `
 

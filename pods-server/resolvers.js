@@ -29,6 +29,14 @@ export const resolvers = {
       pod.songs.push(song);
       return song;
     },
+    popSong: (root, args) => {
+      const pod = getPodById(args.pod_id);
+      const [first, ...rest] = pod.songs;
+      if (first.id == args.song_id) {
+        pod.songs = rest || [];
+        return first;
+      }
+    },
   },
   Song: {
     __resolveType: (obj, context) => 'SoundCloudSong'
