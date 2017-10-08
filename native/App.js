@@ -41,16 +41,16 @@ class App extends React.Component {
 @graphql(GET_PODS)
 class PodListScreen extends React.Component {
   componentDidMount(){
-    const repoName = this.props.entry.repository.full_name;
-    const updateFunction = data.pods.Mutation;
-    this.subscribe(repoName, updateFunction)
+    const varrs = (String)[data.pods.pod,data.pods.song];
+    const updateFunction = data.pods.Mutation.type;
+    this.subscribe(varrs, updateFunction)
   }
 
-  subscribe(repoName, updateQuery){
+  subscribe(varrs, updateQuery){
     this.subscriptionObserver = this.props.client.subscribe({
-      mutation: Mutation,
-      variables: { repoFullName: repoName },
-    }).subscribe({next(data){}, error(err) {console.error('err', err);},
+      mutation: data.pods.Mutation.type,
+      variables: { data.pods.Mutation.type },
+    }).subscribe({next(data){data.pods.Mutation.type(varrs)}, error(err) {console.error('err', err);},
   });
   }
   render() {
