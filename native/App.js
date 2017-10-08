@@ -15,7 +15,7 @@ import { GET_PODS } from './queries';
 class App extends React.Component {
   render() {
     const networkInterface = createNetworkInterface({
-      uri: 'http://localhost:3000/graphql',
+      uri: 'https://calhacks-pods.azurewebsites.net/graphql',
     });
 
     const dataIdFromObject = (result) => {

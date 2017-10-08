@@ -70,7 +70,7 @@ class AddSong extends React.Component {
         <Button
           title="Add new song"
           onPress={() => {
-            if (this.state.text === '') return null;
+            if (!this.state.text || this.state.text === '') return null;
             this.props.mutate({
               variables: { pod_id: this.props.pod_id, track_id: this.state.text },
               refetchQueries: [ { query: GET_POD, variables: { id: this.props.pod_id } } ],
@@ -120,7 +120,7 @@ class SongPlayer extends React.Component {
             playWhenInactive={true}
             onProgress={time => this.setState({ time, status: 'Playing.' })}
             onLoadStart={() => this.setState({ status: 'Loading...' })}
-            onLoad={() => this.setState({ status: 'Loaded!' })}
+            onLoad={() => this.setState({ status: 'Loaded! About to play.' })}
             onError={() => this.setState({ status: 'Song error.' })}
             onBuffer={() => this.setState({ status: 'Buffering...' }) }
             onEnd={() => this.skip(song.id, pod_id)}

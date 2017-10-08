@@ -8,7 +8,7 @@ import { ADD_POD, GET_PODS } from '../../queries';
 class AddPod extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { };
+    this.state = {};
   }
   
   render() {
@@ -23,7 +23,7 @@ class AddPod extends React.Component {
         <Button
           title="Add new pod"
           onPress={() => {
-            if (this.state.text === '') return null;
+            if (!this.state.text || this.state.text === '') return null;
             this.props.mutate({
               variables: { name: this.state.text },
               refetchQueries: [ { query: GET_PODS } ],
