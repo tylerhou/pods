@@ -5,6 +5,17 @@ playlist which people can add to by using SoundCloud's library. Listening
 progress, current track, and play/pause are synced across all participants.
 Just enter a room and start playing music!
 
+## Screenshots
+
+List of pods
+![List of pods](https://raw.githubusercontent.com/tylerhou/pods/master/screenshots/podlist.png)
+
+A pod
+![A pod](https://raw.githubusercontent.com/tylerhou/pods/master/screenshots/podview.png)
+
+Search
+![Search](https://raw.githubusercontent.com/tylerhou/pods/master/screenshots/search.png)
+
 ## Requirements
 `yarn`, `brew`, `npm`, `watchman` (installed with `brew install watchman`). OS
 X.  Android should be supported, but it is untested. Xcode is required for iOS
