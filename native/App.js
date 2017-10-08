@@ -12,12 +12,23 @@ import AddPod from './components/Pods/AddPod';
 
 import { GET_PODS } from './queries';
 
+import { Client, addGraphQLSubscriptions} from 'subscriptions-transport-ws';
+
 class App extends React.Component {
   render() {
     const networkInterface = createNetworkInterface({
       uri: 'http://localhost:3000/graphql',
     });
-    const client = new ApolloClient({ networkInterface });
+    const wsClient = new Client({ networkInterface });
+
+    const networkInterfaceWithSubscriptions = addGraphQLSubscriptions(
+      networkInterface,
+      wsClient
+    );
+
+    const client = new ApolloClient({
+      networkInterface: networkInterfaceWithSubscriptions,
+    });
 
     return (
       <ApolloProvider client={client}>
@@ -29,11 +40,24 @@ class App extends React.Component {
 
 @graphql(GET_PODS)
 class PodListScreen extends React.Component {
+  componentDidMount(){
+    const repoName = this.props.entry.repository.full_name;
+    const updateFunction = data.pods.Mutation;
+    this.subscribe(repoName, updateFunction)
+  }
+
+  subscribe(repoName, updateQuery){
+    this.subscriptionObserver = this.props.client.subscribe({
+      mutation: Mutation,
+      variables: { repoFullName: repoName },
+    }).subscribe({next(data){}, error(err) {console.error('err', err);},
+  });
+  }
   render() {
     const { data, navigation } = this.props;
     console.log(this.props);
     if (data.loading) return <Text>Loading</Text>
-    if (data.error) return <Text>{data.error.message}</Text> 
+    if (data.error) return <Text>{data.error.message}</Text>
 
     return (
       <View style={{ display: 'flex', flexDirection: 'column' }}>
