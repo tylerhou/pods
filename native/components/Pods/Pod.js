@@ -25,9 +25,9 @@ class Pod extends React.Component {
     const { pod } = data;
 
     return (
-      <View style={{ display: 'flex', flex: 1 }}>
-        <Text>Pod name: {pod.name}</Text>
-        <Text>Songs</Text>
+      <View style={{ display: 'flex', flex: 1, paddingLeft: 10, paddingRight: 10 }}>
+        <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{pod.name}</Text>
+        <Text style={{ fontSize: 20, }}>Up next:</Text>
         <SongList songs={pod.songs} />
         <AddSong pod_id={pod.id}/>
         {
@@ -49,9 +49,9 @@ class SongList extends React.Component {
     const { songs } = this.props;
 
     return (
-      <View>
+      <ScrollView style={{ flexGrow: 0, height: 100 }}>
         {songs.map(song => <SongListItem song={song} key={song.id} />)}
-      </View>
+      </ScrollView>
     );
   }
 }
@@ -61,7 +61,7 @@ class SongListItem extends React.Component {
     const { song } = this.props;
     return (
       <View>
-        <Text>{song.title}</Text>
+        <Text style={{ fontSize: 15, fontWeight: 'bold' }}>{song.title}</Text>
       </View>
     );
   }
