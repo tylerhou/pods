@@ -17,7 +17,7 @@ namespace PlaylistSyncClientAndroid.Services
 		public const string ActionPause = "com.xamarin.action.PAUSE";
 		public const string ActionStop = "com.xamarin.action.STOP";
 
-		private const string Mp3 = @"http://jasonlis.website/static/fife_and_gun.mp3";
+		private string stream_url;
 
 		private MediaPlayer player;
 		private AudioManager audioManager;
@@ -50,7 +50,7 @@ namespace PlaylistSyncClientAndroid.Services
 
 		public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
 		{
-
+			stream_url = intent.GetStringExtra("Stream_Url");
 			switch (intent.Action)
 			{
 				case ActionPlay: Play(); break;
@@ -65,6 +65,14 @@ namespace PlaylistSyncClientAndroid.Services
 		private void IntializePlayer()
 		{
 			player = new MediaPlayer();
+			player.SetAudioStreamType(Android.Media.Stream.Music);
+
+			player.Completion += delegate
+			{
+				Intent intent = new Intent();
+				intent.SetAction("PlaylistSyncClientAndroid.Services.SONG_IS_DONE");
+				this.SendBroadcast(intent);
+			};
 
 			//Tell our player to sream music
 			player.SetAudioStreamType(Stream.Music);
@@ -108,7 +116,7 @@ namespace PlaylistSyncClientAndroid.Services
 
 			try
 			{
-				await player.SetDataSourceAsync(ApplicationContext, Android.Net.Uri.Parse(Mp3));
+				await player.SetDataSourceAsync(ApplicationContext, Android.Net.Uri.Parse(stream_url));
 
 				var focusResult = audioManager.RequestAudioFocus(this, Stream.Music, AudioFocus.Gain);
 				if (focusResult != AudioFocusRequest.Granted)
@@ -146,6 +154,7 @@ namespace PlaylistSyncClientAndroid.Services
 			notification.Flags |= NotificationFlags.OngoingEvent;
 			notification.SetLatestEventInfo(ApplicationContext, "Xamarin Streaming",
 							"Playing music!", pendingIntent);
+			notification.Icon = Resource.Drawable.ic_audiotrack;
 			StartForeground(NotificationId, notification);
 		}
 

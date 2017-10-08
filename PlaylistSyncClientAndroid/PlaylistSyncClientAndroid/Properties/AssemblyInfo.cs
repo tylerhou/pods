@@ -31,4 +31,5 @@ using Android.App;
 
 
 //Android permissions
+[assembly: UsesPermission(Android.Manifest.Permission.Internet)]
 [assembly: UsesPermission(Android.Manifest.Permission.WakeLock)]
