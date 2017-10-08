@@ -34,11 +34,12 @@ namespace PlaylistSyncClientAndroid
 			foreach (string song in songs)
 			{
 				if (song == "") continue;
-				Track t;
+				Track t = new Track();
 				string[] song_data = song.Split('\\');
-				t.Name = song_data[0];
-				t.Url = song_data[1];
-				t.Length = song_data[2];
+				t.NowPlaying = song_data[0];
+				t.Name = song_data[1];
+				t.Url = song_data[2];
+				t.Length = song_data[3];
 				tracks.Add(t);
 			}
 			resp.Close();
@@ -49,6 +50,8 @@ namespace PlaylistSyncClientAndroid
 			string data = "";
 			foreach (Track track in tracks)
 			{
+				data += track.NowPlaying;
+				data += '\\';
 				data += track.Name;
 				data += '\\';
 				data += track.Url;

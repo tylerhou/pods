@@ -26,6 +26,20 @@ namespace PlaylistSyncClientAndroid
 			ListView trackList = FindViewById<ListView>(Resource.Id.TrackList);
 			TrackListArrayAdapter adapter = new TrackListArrayAdapter(this, m_tracks);
 			trackList.Adapter = adapter;
+			trackList.ItemClick += async (sender, e) =>
+			{
+				Show_Dialog diag = new Show_Dialog(this);
+				Show_Dialog.MessageResult result = await diag.ShowDialog("", "Delete this track?", false, false, Show_Dialog.MessageResult.YES, Show_Dialog.MessageResult.NO);
+				if (result == Show_Dialog.MessageResult.YES)
+				{
+					m_tracks.RemoveAt(e.Position);
+					m_upd.SendToServer(m_tracks);
+					RefreshTracklist();
+					bool wasPlaying = Services.StreamingBackgroundService.IsPlaying;
+					HandleMusicAction(Services.StreamingBackgroundService.ActionStop, m_tracks);
+					if (wasPlaying) PlayIfSongAvailable();
+				}
+			};
 
 			Button addTrack = FindViewById<Button>(Resource.Id.AddTrack);
 			addTrack.Click += (sender, e) =>
@@ -50,13 +64,32 @@ namespace PlaylistSyncClientAndroid
 
 			var timer = new System.Threading.Timer((e) =>
 			{
-				m_upd.Update(m_tracks);
-				this.RunOnUiThread(() =>
+				string old_url = "";
+				if (m_tracks.Count > 0)
 				{
-					trackList.PostInvalidate();
-					trackList.Invalidate();
-					trackList.InvalidateViews();
-				});
+					old_url = m_tracks[0].Url;
+				}
+				m_upd.Update(m_tracks);
+				if (m_tracks.Count > 0)
+				{
+					if (old_url != m_tracks[0].Url && Services.StreamingBackgroundService.IsPlaying)
+					{
+						HandleMusicAction(Services.StreamingBackgroundService.ActionStop, m_tracks);
+						PlayIfSongAvailable();
+					}
+				}
+				else
+				{
+					HandleMusicAction(Services.StreamingBackgroundService.ActionStop, m_tracks);
+				}
+				if (Services.StreamingBackgroundService.IsPlaying)
+				{
+					Track t = m_tracks[0];
+					t.NowPlaying = "▶ ";
+					m_tracks[0] = t;
+				}
+				m_upd.SendToServer(m_tracks);
+				RefreshTracklist();
 			}, null, 1000, 1000);
 		}
 
@@ -64,16 +97,28 @@ namespace PlaylistSyncClientAndroid
 		{
 			if (m_tracks.Count > 0)
 			{
+				Track t = m_tracks[0];
+				t.NowPlaying = "▶ ";
+				m_tracks[0] = t;
+				m_upd.SendToServer(m_tracks);
 				HandleMusicAction(Services.StreamingBackgroundService.ActionPlay, m_tracks);
 			}
 		}
 
 		private void HandleMusicAction(string action, IList<Track> tracks)
 		{
+			if (action != Services.StreamingBackgroundService.ActionPlay && m_tracks.Count > 0)
+			{
+				Track t = m_tracks[0];
+				t.NowPlaying = "";
+				m_tracks[0] = t;
+				m_upd.SendToServer(m_tracks);
+			}
 			var intent = new Intent(action);
 			if (tracks.Count > 0) intent.PutExtra("Stream_Url", tracks[0].Url);
 			intent.SetPackage(this.PackageName);
 			StartService(intent);
+			RefreshTracklist();
 		}
 
 		public void StartNextSong()
@@ -84,10 +129,18 @@ namespace PlaylistSyncClientAndroid
 				PlayIfSongAvailable();
 			}
 			m_upd.SendToServer(m_tracks);
-			ListView trackList = FindViewById<ListView>(Resource.Id.TrackList);
-			trackList.PostInvalidate();
-			trackList.Invalidate();
-			trackList.InvalidateViews();
+			RefreshTracklist();
+		}
+
+		private void RefreshTracklist()
+		{
+			this.RunOnUiThread(() =>
+			{
+				ListView trackList = FindViewById<ListView>(Resource.Id.TrackList);
+				trackList.PostInvalidate();
+				trackList.Invalidate();
+				trackList.InvalidateViews();
+			});
 		}
 
 		private IList<Track> m_tracks;

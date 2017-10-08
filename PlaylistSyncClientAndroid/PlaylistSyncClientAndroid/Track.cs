@@ -17,5 +17,6 @@ namespace PlaylistSyncClientAndroid
 		public string Name;
 		public string Length;
 		public string Url;
+		public string NowPlaying;
 	}
 }

@@ -16,6 +16,7 @@ namespace PlaylistSyncClientAndroid.Services
 		public const string ActionPlay = "com.xamarin.action.PLAY";
 		public const string ActionPause = "com.xamarin.action.PAUSE";
 		public const string ActionStop = "com.xamarin.action.STOP";
+		public static bool IsPlaying = false;
 
 		private string stream_url;
 
@@ -96,7 +97,7 @@ namespace PlaylistSyncClientAndroid.Services
 
 		private async void Play()
 		{
-
+			IsPlaying = true;
 			if (paused && player != null)
 			{
 				paused = false;
@@ -160,6 +161,7 @@ namespace PlaylistSyncClientAndroid.Services
 
 		private void Pause()
 		{
+			IsPlaying = false;
 			if (player == null)
 				return;
 
@@ -172,6 +174,7 @@ namespace PlaylistSyncClientAndroid.Services
 
 		private void Stop()
 		{
+			IsPlaying = false;
 			if (player == null)
 				return;
 

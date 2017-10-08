@@ -30,7 +30,7 @@ namespace PlaylistSyncClientAndroid
 			TextView text1 = (TextView)view.FindViewById(Android.Resource.Id.Text1);
 			TextView text2 = (TextView)view.FindViewById(Android.Resource.Id.Text2);
 
-			text1.Text = m_tracks[position].Name;
+			text1.Text = m_tracks[position].NowPlaying + m_tracks[position].Name;
 			text2.Text = m_tracks[position].Length;
 			return view;
 		}
