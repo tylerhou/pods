@@ -1,3 +1,5 @@
+import "isomorphic-fetch";
+
 const pods = [{
   id: 0,
   name: 'testing',
@@ -7,6 +9,13 @@ let nextPodId = 1;
 let nextSongId = 0;
 
 const getPodById = id => pods.find(pod => pod.id == id);
+const CLIENT_PARAMETER = '?client_id=095fe1dcd09eb3d0e1d3d89c76f5618f';
+
+const getSoundCloudTrack = (track_id) => {
+  return fetch(`https://api.soundcloud.com/tracks/${track_id}${CLIENT_PARAMETER}`)
+  .then(response => response.json())
+};
+
 
 export const resolvers = {
   Query: {
@@ -24,10 +33,17 @@ export const resolvers = {
       return pod;
     },
     addSong: (root, args) => {
-      const song = { id: nextSongId++, track_url: args.track_url };
-      const pod = getPodById(args.pod_id)
-      pod.songs.push(song);
-      return song;
+      return getSoundCloudTrack(args.track_id).then(response => {
+        const song = {
+          id: nextSongId++,
+          stream_url: response.stream_url + CLIENT_PARAMETER,
+          title: response.title,
+          artist: response.user.username,
+        };
+        const pod = getPodById(args.pod_id);
+        pod.songs.push(song);
+        return song;
+      }).catch(error => null);
     },
     popSong: (root, args) => {
       const pod = getPodById(args.pod_id);
@@ -37,9 +53,6 @@ export const resolvers = {
         return first;
       }
     },
-  },
-  Song: {
-    __resolveType: (obj, context) => 'SoundCloudSong'
   },
 };
 

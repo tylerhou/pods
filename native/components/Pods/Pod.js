@@ -4,7 +4,7 @@ import { graphql } from 'react-apollo';
 
 import Video from 'react-native-video';
 
-import { GET_POD, ADD_SONG } from '../../queries';
+import { GET_POD, ADD_SONG, POP_SONG } from '../../queries';
 
 @graphql(GET_POD)
 class Pod extends React.Component {
@@ -20,7 +20,11 @@ class Pod extends React.Component {
         <Text>Songs</Text>
         <SongList songs={pod.songs} />
         <AddSong pod_id={pod.id}/>
-        <SongPlayer song={pod.songs[0]} />  
+        {
+          pod.songs.length === 0 ?
+          <Text>Add a song!</Text>
+          : <SongPlayer song={pod.songs[0]} pod_id={pod.id} />  
+        }
       </View>      
     );
   }
@@ -42,7 +46,7 @@ class SongListItem extends React.Component {
   render() {
     const { song } = this.props;
     return (
-      <Text>{song.track_url}</Text>
+      <Text>{song.title}</Text>
     );
   }
 }
@@ -68,7 +72,7 @@ class AddSong extends React.Component {
           onPress={() => {
             if (this.state.text === '') return null;
             this.props.mutate({
-              variables: { pod_id: this.props.pod_id, track_url: this.state.text },
+              variables: { pod_id: this.props.pod_id, track_id: this.state.text },
               refetchQueries: [ { query: GET_POD, variables: { id: this.props.pod_id } } ],
             });
             this.setState({ text: ''});
@@ -79,48 +83,56 @@ class AddSong extends React.Component {
   }
 }
 
-const CLIENT_PARAMETER = '?client_id=095fe1dcd09eb3d0e1d3d89c76f5618f';
 
-const getSoundCloudStreamingUrl = (track_id) => {
-  return fetch(`https://api.soundcloud.com/tracks/${track_id}${CLIENT_PARAMETER}`)
-  .then(response => response.json())
-};
-
+@graphql(POP_SONG)
 class SongPlayer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
 
-  componentWillMount() {
-    getSoundCloudStreamingUrl(this.props.song.track_url).then(source => {
-      this.setState({ source })
-    }).catch(error => {
-      console.log(error);
+  skip = (song_id, pod_id) => {
+    this.props.mutate({
+      variables: { pod_id: pod_id, song_id: song_id },
+      refetchQueries: [ { query: GET_POD, variables: { id: pod_id } } ],
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.song.id !== this.props.song.id) this.player.seek(0);
+  }
+
   render() {
-    const { source, paused } = this.state;
-    if (!source) return <Text>No internet connection</Text>;
+    const { song, pod_id } = this.props;
+    const { paused, time={}, status } = this.state;
+    if (!song) return <Text>No internet connection</Text>;
+    const current_time = time.atValue / (time.atTimescale * time.seekableDuration) || 0;
     return (
       <View style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center' }}>
         {
-          source.stream_url && <Video
-            source={{ uri: source.stream_url + CLIENT_PARAMETER }}
+          song.stream_url
+          && <Video
+            source={{ uri: song.stream_url }}
             ref={(ref) => this.player = ref}
             volume={1.0}
             paused={paused}
-            playInBackground
-            playWhenInactive
+            playInBackground={true}
+            playWhenInactive={true}
+            onProgress={time => this.setState({ time, status: 'Playing.' })}
+            onLoadStart={() => this.setState({ status: 'Loading...' })}
+            onLoad={() => this.setState({ status: 'Loaded!' })}
+            onError={() => this.setState({ status: 'Song error.' })}
+            onBuffer={() => this.setState({ status: 'Buffering...' }) }
+            onEnd={() => this.skip(song.id, pod_id)}
           />
         }
-        <Text>Now playing: {source.title}</Text>
-        <Text>Artist: {source.user.username}</Text>
-        <Slider style={{ width: '90%' }}/>
+        <Text>{status === 'Playing.' && paused ? 'Paused' : status}</Text>
+        <Text>Now playing: {song.title}</Text>
+        <Text>Artist: {song.artist}</Text>
+        <Slider value={current_time}style={{ width: '90%' }}/>
         <View style={{ display: 'flex', flexDirection: 'row' }}>
           <Button onPress={() => this.setState({ paused: !paused })} title="toggle play/pause" />
-          <Button onPress={() => this.setState({ paused: !paused })} title="skip" />
+          <Button onPress={() => this.skip(song.id, pod_id)} title="skip" />
         </View>
       </View>
     );

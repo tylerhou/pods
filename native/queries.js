@@ -1,5 +1,6 @@
 import gql from 'graphql-tag';
 
+
 export const ADD_POD = gql`
   mutation addPod($name: String!) {
     addPod(name: $name) {
@@ -15,10 +16,10 @@ export const GET_PODS = gql`
       id
       name 
       songs {
-        ... on SoundCloudSong {
-          id
-          track_url
-        }
+        id
+        artist
+        title
+        stream_url 
       }
     }
   }
@@ -30,22 +31,30 @@ export const GET_POD = gql`
       id
       name
       songs {
-        ... on SoundCloudSong {
-          id
-          track_url
-        }
+        id
+        artist
+        title
+        stream_url 
       }
     }
   }
 `
 
 export const ADD_SONG = gql`
-  mutation addSong($pod_id: ID!, $track_url: String!) {
-    addSong(pod_id: $pod_id, track_url: $track_url) {
-      ... on SoundCloudSong {
-        id
-        track_url
-      }
+  mutation addSong($pod_id: ID!, $track_id: String!) {
+    addSong(pod_id: $pod_id, track_id: $track_id) {
+      id
+      artist
+      title
+      stream_url
+    }
+  }
+`
+
+export const POP_SONG = gql`
+  mutation popSong($pod_id: ID!, $song_id: ID!) {
+    popSong(pod_id: $pod_id, song_id: $song_id) {
+      id
     }
   }
 `

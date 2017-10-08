@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import { ApolloProvider, graphql } from 'react-apollo';
-import { ApolloClient, createNetworkInterface } from 'apollo-client';
+import { ApolloClient, createNetworkInterface, toIdValue } from 'apollo-client';
 
 import { StackNavigator } from 'react-navigation';
 import Video from 'react-native-video';
@@ -17,7 +17,19 @@ class App extends React.Component {
     const networkInterface = createNetworkInterface({
       uri: 'http://localhost:3000/graphql',
     });
-    const client = new ApolloClient({ networkInterface });
+
+    const dataIdFromObject = (result) => {
+      if (result.__typename) {
+        if (result.id !== undefined) {
+          return `${result.__typename}:${result.id}`;
+        }
+      }
+      return null;
+    }
+
+    const client = new ApolloClient({
+      networkInterface,
+    });
 
     return (
       <ApolloProvider client={client}>
@@ -31,7 +43,6 @@ class App extends React.Component {
 class PodListScreen extends React.Component {
   render() {
     const { data, navigation } = this.props;
-    console.log(this.props);
     if (data.loading) return <Text>Loading</Text>
     if (data.error) return <Text>{data.error.message}</Text> 
 

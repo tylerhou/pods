@@ -3,12 +3,12 @@ import { makeExecutableSchema } from 'graphql-tools';
 import resolvers from './resolvers';
 
 const typeDefs = `
-  type SoundCloudSong {
+  type Song {
     id: ID!
-    track_url: String!
+    artist: String!
+    title: String!
+    stream_url: String!
   }
-
-  union Song = SoundCloudSong
 
   type Pod {
     id: ID!
@@ -23,7 +23,7 @@ const typeDefs = `
 
   type Mutation {
     addPod(name: String!): Pod
-    addSong(pod_id: ID!, track_url: String!): Song
+    addSong(pod_id: ID!, track_id: String!): Song
     popSong(song_id: ID!, pod_id: ID!): Song
   }
 `
