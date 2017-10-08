@@ -11,8 +11,20 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+@import AVFoundation;
 
 @implementation AppDelegate
+
+- (void)setSharedAudioSessionCategory
+{
+  NSError *categoryError = nil;
+  [[AVAudioSession sharedInstance]
+    setCategory:AVAudioSessionCategoryPlayback
+          error:&categoryError];
+  if (categoryError) {
+    NSLog(@"Error setting category!");
+  }
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {

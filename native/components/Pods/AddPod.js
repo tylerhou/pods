@@ -13,7 +13,7 @@ class AddPod extends React.Component {
   
   render() {
     return (
-      <View style={{ display: 'flex', marginTop: 10, flex: 1, paddingLeft: 10, paddingRight: 10 }}>
+      <View style={{ display: 'flex', marginTop: 10, flex: 0, paddingLeft: 10, paddingRight: 10, height: 200}}>
         <TextInput
           style={styles.input}
           value={this.state.text}

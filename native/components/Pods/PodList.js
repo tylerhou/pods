@@ -5,7 +5,7 @@ class PodList extends React.Component {
   render() {
     const { pods, onPress } = this.props;
     return (
-      <ScrollView style={{ height: 400 }}>
+      <ScrollView style={{ height: 450 }}>
         {pods.map(pod => <PodListItem {...pod} key={pod.id} onPress={() => onPress(pod.id)}/>)}
       </ScrollView>
     );
